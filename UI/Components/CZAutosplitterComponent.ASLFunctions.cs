@@ -85,7 +85,6 @@ namespace CZAutosplitter.UI.Components
         {
             if (CutsceneIDString == "700_" && OldCutsceneIDString != "700_")
             {
-                Splits.Clear();
                 return true;
             }
             return false;
@@ -93,6 +92,7 @@ namespace CZAutosplitter.UI.Components
 
         public void OnReset()
         {
+            Splits.Clear();
         }
 
         public bool Split()
