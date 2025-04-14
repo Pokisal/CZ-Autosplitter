@@ -38,6 +38,8 @@ namespace CZAutosplitter.Memory
             /// Check if inputted IP is actually a valid IP and someone didn't just accidentally hit set
             if (!ParseIP(IP)) return new byte[length];
             var tcp = new TcpClient();
+            tcp.ReceiveTimeout = 1000;
+            tcp.SendTimeout = 1000;
             if (!tcp.Client.ConnectAsync(IP, 730).Wait(1000))
             {
                 /// Wait 1 second to connect to the Xbox if it doesn't IP probably isn't valid so close the connection and return nothing
