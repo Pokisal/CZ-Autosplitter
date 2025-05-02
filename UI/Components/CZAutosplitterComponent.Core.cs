@@ -46,7 +46,7 @@ namespace CZAutosplitter.UI.Components
         private void UpdateMemory(object sender, ElapsedEventArgs e)
         {
             /// Have to do this dog shit to avoid a race condition and prevent LiveSplit from lagging like a bitch
-            Update();
+            if (!Update()) return;
             if (Timer.CurrentState.CurrentPhase == TimerPhase.Running)
             {
                 Timer.CurrentState.IsGameTimePaused = IsLoading();

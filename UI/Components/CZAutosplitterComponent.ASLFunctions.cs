@@ -44,18 +44,18 @@ namespace CZAutosplitter.UI.Components
         {
         }
 
-        public void Update()
+        public bool Update()
         {
             OldCutsceneIDString = CutsceneIDString;
-            CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4);
-            InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1).ElementAt(0) != 0;
-            InCutscene = TCPFunctions.RequestMemory(0xC9355B3E, 1).ElementAt(0) != 0;
+            CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
+            InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, InLoad).ElementAt(0) != 0;
+            InCutscene = TCPFunctions.RequestMemory(0xC9355B3E, 1, InCutscene).ElementAt(0) != 0;
             CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
+            return true;
         }
-
         public bool Start()
         {
-            if (OldCutsceneIDString != "702_" && CutsceneIDString == "702_")
+            if (OldCutsceneIDString != "701_" && CutsceneIDString == "701_")
             {
                 return true;
             }
@@ -82,7 +82,7 @@ namespace CZAutosplitter.UI.Components
 
         public bool Reset()
         {
-            if ((CutsceneIDString == "701_" && OldCutsceneIDString != "701_") || (CutsceneIDString == "700_" && OldCutsceneIDString != "700_"))
+            if (CutsceneIDString == "700_" && OldCutsceneIDString != "700_")
             {
                 return true;
             }
