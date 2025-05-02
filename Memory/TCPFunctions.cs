@@ -21,7 +21,7 @@ namespace CZAutosplitter.Memory
 
         public static bool IsGameRunning()
         {
-            string Result = Encoding.ASCII.GetString(RequestMemory(0xC201B7E4, 8));
+            string Result = Encoding.ASCII.GetString(RequestMemory(0xC201B7E4, 8, (string)default));
             if (Result == TitleID)
             {
                 return true;
@@ -33,7 +33,7 @@ namespace CZAutosplitter.Memory
             IPAddress address;
             return IPAddress.TryParse(input, out address) && address.ToString() == input;
         }
-        public static byte[] RequestMemory(uint address, uint length)
+        public static byte[] RequestMemory(uint address, uint length, dynamic variable)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace CZAutosplitter.Memory
                 if (!tcp.Client.ConnectAsync(IP, 730).Wait(1000))
                 {
                     tcp.Close();
-                    return new byte[length];
+                    return variable;
                 }
                 var response1 = new byte[1024];
                 var response2 = new byte[1024];
@@ -60,7 +60,7 @@ namespace CZAutosplitter.Memory
             }
             catch (SocketException)
             {
-                return new byte[length];
+                return variable;
             }
         }
     }
