@@ -128,7 +128,6 @@ namespace CZAutosplitter.UI.Components
         private void SetSetting(XmlNode setting)
         {
             SavedIP = setting.Attributes["Value"].Value;
-            TCPFunctions.IP = SavedIP;
             textBox1.Text = SavedIP;
         }
 
@@ -212,11 +211,6 @@ namespace CZAutosplitter.UI.Components
             {
                 e.Handled = true;
             }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            TCPFunctions.IP = SavedIP;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
