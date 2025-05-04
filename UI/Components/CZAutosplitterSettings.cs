@@ -21,14 +21,13 @@ namespace CZAutosplitter.UI.Components
         public readonly Dictionary<string, bool> DefaultSettings = new Dictionary<string, bool>()
         {
             { "Splits", true },
-            { "Case1-1", true },
-            { "Case1-2", true },
-            { "Case2-1", true },
-            { "Case2-2", true },
-            { "Case2-3", true },
-            { "Case3-1", true },
-            { "Case3-2", true },
-            { "Harjit", true }
+            { "Case0-1", true },
+            { "Case0-2", true },
+            { "Case0-3", true },
+            { "Case0-4", true },
+            { "Zombrex1", true },
+            { "Jed", true },
+            { "EndingA", true }
         };
 
         public bool Start => cbxStart.Checked;
