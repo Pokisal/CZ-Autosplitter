@@ -16,7 +16,6 @@ namespace CZAutosplitter.Memory
 {
     public class TCPFunctions
     {
-        public static string IP = "";
         public static string TitleID = "58410A8D";
 
         public static bool IsGameRunning()
@@ -37,11 +36,11 @@ namespace CZAutosplitter.Memory
         {
             try
             {
-                if (!ParseIP(IP)) return new byte[length];
+                if (!ParseIP(AutosplitterSettings.SavedIP)) return new byte[length];
                 var tcp = new TcpClient();
                 tcp.ReceiveTimeout = 1000;
                 tcp.SendTimeout = 1000;
-                if (!tcp.Client.ConnectAsync(IP, 730).Wait(1000))
+                if (!tcp.Client.ConnectAsync(AutosplitterSettings.SavedIP, 730).Wait(1000))
                 {
                     tcp.Close();
                     return variable;
