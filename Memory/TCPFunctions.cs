@@ -52,7 +52,7 @@ namespace CZAutosplitter.Memory
                         tcp.Close();
                         return variable;
                     }
-                    if (divisions == 0 || i == divisions)
+                    if (i == divisions)
                     {
                         length = remainder;
                     }
