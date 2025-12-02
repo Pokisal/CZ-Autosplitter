@@ -37,7 +37,6 @@ namespace CZAutosplitter.Memory
                     tcp.SendTimeout = 1000;
                     if (!tcp.Client.ConnectAsync(AutosplitterSettings.SavedIP, 730).Wait(1000))
                     {
-                        tcp.Close();
                         return OldValue;
                     }
                     if (i == Chunks)
@@ -60,9 +59,9 @@ namespace CZAutosplitter.Memory
                 }
                 return Data;
             }
-            catch (SocketException err)
+            catch (Exception err)
             {
-                Utility.Log("Socket Exception: " + err + " occured");
+                Utility.Log("Exception: " + err + " occured");
                 return OldValue;
             }
         }
