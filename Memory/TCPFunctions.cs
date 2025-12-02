@@ -16,18 +16,6 @@ namespace CZAutosplitter.Memory
 {
     public class TCPFunctions
     {
-        public static string TitleID = "58410A8D";
-
-
-        public static bool IsGameRunning()
-        {
-            string Result = Encoding.ASCII.GetString(RequestMemory(0xC201B7E4, 8, (string)default));
-            if (Result == TitleID)
-            {
-                return true;
-            }
-            return false;
-        }
         public static bool ParseIP(string input)
         {
             IPAddress address;
@@ -72,8 +60,9 @@ namespace CZAutosplitter.Memory
                 }
                 return Data;
             }
-            catch (SocketException)
+            catch (SocketException err)
             {
+                Utility.Log("Socket Exception: " + err + " occured");
                 return OldValue;
             }
         }
