@@ -11,7 +11,7 @@ namespace CZAutosplitter.UI.Components
 {
     public class CZAutosplitterFactory : IComponentFactory
     {
-        public string ComponentName => "CW Autosplitter";
+        public string ComponentName => "CZ Autosplitter";
 
         public string Description => "Component based autosplitter";
 
