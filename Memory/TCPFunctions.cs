@@ -16,6 +16,7 @@ namespace CZAutosplitter.Memory
 {
     public class TCPFunctions
     {
+        public static TcpClient tcp;
         public static bool ParseIP(string input)
         {
             IPAddress address;
@@ -32,13 +33,10 @@ namespace CZAutosplitter.Memory
                 for (uint i = 0; i <= Chunks; ++i)
                 {
                     uint Length;
-                    var tcp = new TcpClient();
-                    tcp.ReceiveTimeout = 1000;
+                    tcp = new TcpClient();
                     tcp.SendTimeout = 1000;
-                    if (!tcp.Client.ConnectAsync(AutosplitterSettings.SavedIP, 730).Wait(1000))
-                    {
-                        return OldValue;
-                    }
+                    tcp.ReceiveTimeout = 1000;
+                    tcp.Client.Connect(AutosplitterSettings.SavedIP, 730);
                     if (i == Chunks)
                     {
                         Length = Remainder;
@@ -47,7 +45,8 @@ namespace CZAutosplitter.Memory
                     {
                         Length = 1024;
                     }
-                    var ConnectionStatusResponse = new byte[1024];
+                    // Get response and flush the connection
+                    var ConnectionStatusResponse = new byte[65536];
                     tcp.Client.Receive(ConnectionStatusResponse);
                     tcp.Client.Send(Encoding.ASCII.GetBytes(string.Format("GETMEMEX ADDR={0} LENGTH={1}\r\n", Address + (0x400 * i), 1024)));
                     var MemoryStatusResponse = new byte[1024];
@@ -55,13 +54,15 @@ namespace CZAutosplitter.Memory
                     byte[] Buffer = new byte[Length + 2];
                     tcp.Client.Receive(Buffer);
                     Array.Copy(Buffer, 2, Data, 0 + (1024 * i), Length);
+                    tcp.Client.Send(Encoding.UTF8.GetBytes("\r\nBYE"));
                     tcp.Close();
                 }
                 return Data;
             }
             catch (Exception err)
             {
-                Utility.Log("Exception: " + err + " occured");
+                if (tcp.Connected) { tcp.Close(); }
+                Utility.Log(err);
                 return OldValue;
             }
         }
