@@ -44,14 +44,13 @@ namespace CZAutosplitter.UI.Components
         {
         }
 
-        public bool Update()
+        public void Update()
         {
             OldCutsceneIDString = CutsceneIDString;
             CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
             InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, BitConverter.GetBytes(InLoad)).ElementAt(0) != 0;
             InCutscene = TCPFunctions.RequestMemory(0xC9355B3E, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
             CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
-            return true;
         }
         public bool Start()
         {
