@@ -2,6 +2,7 @@
 using LiveSplit.ComponentUtil;
 using LiveSplit.Web.Share;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +18,9 @@ namespace CZAutosplitter.UI.Components
 {
     public partial class CZAutosplitter : LiveSplit.UI.Components.IComponent
     {
+        private static ProcessMemory GameMemory;
+        private static Process GameProcess;
+
         public byte[] CutsceneID = new byte[4] { 0, 0, 0, 0 };
         public bool InLoad;
         public bool InCutscene;
@@ -44,13 +48,57 @@ namespace CZAutosplitter.UI.Components
         {
         }
 
+        public void StartProcessActions()
+        {
+            if (GameMemory != null && !GameMemory.CheckProcess())
+            {
+                GameMemory = null;
+                return;
+            }
+            if (GameMemory == null)
+            {
+                GameMemory = new ProcessMemory(GameProcess);
+            }
+            if (!GameMemory.IsProcessStarted())
+            {
+                GameMemory.StartProcess();
+            }
+        }
+
         public void Update()
         {
             OldCutsceneIDString = CutsceneIDString;
-            CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
-            InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, BitConverter.GetBytes(InLoad)).ElementAt(0) != 0;
-            InCutscene = TCPFunctions.RequestMemory(0xC9355B3E, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
-            CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
+            Process[] processesByName = Process.GetProcessesByName("xenia");
+            Process[] processesByName2 = Process.GetProcessesByName("xenia_canary");
+            processesByName = processesByName.Concat(processesByName2).ToArray();
+
+            if (processesByName.Length != 0 && (GameProcess == null || processesByName[0].Id.ToString("X8") != GameProcess.Id.ToString("X8")))
+            {
+                GameProcess = processesByName[0];
+            }
+
+            if (processesByName.Length == 0)
+            {
+                CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
+                InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, BitConverter.GetBytes(InLoad)).ElementAt(0) != 0;
+                InCutscene = TCPFunctions.RequestMemory(0xC9355B3E, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
+                CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
+            }
+            else
+            {
+                /// Xenia RAM starts at 0x200000000, then emulated game ram is offset by 0x4E000
+                StartProcessActions();
+                try
+                {
+                    CutsceneIDString = GameMemory.ReadStringAscii((IntPtr)(0x200000000 + 0x4E000 + 0xC8E63EBC), 4);
+                    InLoad = GameMemory.ReadByte((IntPtr)(0x200000000 + 0x4E000 + 0xC8E63FB8)) != 0;
+                    InCutscene = GameMemory.ReadByte((IntPtr)(0x200000000 + 0x4E000 + 0xC9355B3E)) != 0;
+                }
+                catch (NullReferenceException)
+                {
+                    return;
+                }
+            }
         }
         public bool Start()
         {
