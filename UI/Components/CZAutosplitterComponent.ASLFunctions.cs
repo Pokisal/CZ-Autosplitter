@@ -21,6 +21,8 @@ namespace CZAutosplitter.UI.Components
         private static ProcessMemory GameMemory;
         private static Process GameProcess;
 
+        public long RamBase = 0x200000000;
+
         public byte[] CutsceneID = new byte[4] { 0, 0, 0, 0 };
         public bool InLoad;
         public bool InCutscene;
@@ -54,7 +56,7 @@ namespace CZAutosplitter.UI.Components
             {
                 input += 0x4E000;
             }
-            return (IntPtr)(0x200000000 + input);
+            return (IntPtr)(RamBase + input);
         }
 
         public void StartProcessActions()
@@ -98,6 +100,13 @@ namespace CZAutosplitter.UI.Components
                 StartProcessActions();
                 try
                 {
+                    var offset = GameMemory.ReadShort(GetIntPtr(0x82000000));
+
+                    if (offset != 23117)
+                    {
+                        RamBase = 0x100000000;
+                    }
+
                     CutsceneIDString = GameMemory.ReadStringAscii(GetIntPtr(0xC8E63EBC), 4);
                     InLoad = GameMemory.ReadByte(GetIntPtr(0xC8E63FB8)) != 0;
                     InCutscene = GameMemory.ReadByte(GetIntPtr(0xC9355B3E)) != 0;
