@@ -79,6 +79,8 @@ namespace CZAutosplitter.UI.Components
         public void Update()
         {
             OldCutsceneIDString = CutsceneIDString;
+            OldInLoad = InLoad;
+
             Process[] processesByName = Process.GetProcessesByName("xenia");
             Process[] processesByName2 = Process.GetProcessesByName("xenia_canary");
             processesByName = processesByName.Concat(processesByName2).ToArray();
@@ -92,7 +94,8 @@ namespace CZAutosplitter.UI.Components
             {
                 CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
                 InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, BitConverter.GetBytes(InLoad)).ElementAt(0) != 0;
-                InCutscene = TCPFunctions.RequestMemory(0xC20EAA0F, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
+                /// For whatever reason this InCutscene address does not work on Xenia so I have to use the old one there.
+                InCutscene = TCPFunctions.RequestMemory(0xC301B497, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
                 CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
             }
             else
@@ -109,7 +112,7 @@ namespace CZAutosplitter.UI.Components
 
                     CutsceneIDString = GameMemory.ReadStringAscii(GetIntPtr(0xC8E63EBC), 4);
                     InLoad = GameMemory.ReadByte(GetIntPtr(0xC8E63FB8)) != 0;
-                    InCutscene = GameMemory.ReadByte(GetIntPtr(0xC20E8648)) != 0;
+                    InCutscene = GameMemory.ReadByte(GetIntPtr(0xCA474D0F)) != 0;
                 }
                 catch (NullReferenceException)
                 {
