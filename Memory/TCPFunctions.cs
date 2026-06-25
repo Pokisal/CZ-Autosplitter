@@ -45,7 +45,6 @@ namespace CZAutosplitter.Memory
                     {
                         Length = 1024;
                     }
-                    // Get response and flush the connection
                     var ConnectionStatusResponse = new byte[65536];
                     tcp.Client.Receive(ConnectionStatusResponse);
                     tcp.Client.Send(Encoding.ASCII.GetBytes(string.Format("GETMEMEX ADDR={0} LENGTH={1}\r\n", Address + (0x400 * i), 1024)));
@@ -59,10 +58,9 @@ namespace CZAutosplitter.Memory
                 }
                 return Data;
             }
-            catch (Exception err)
+            catch (Exception)
             {
                 if (tcp.Connected) { tcp.Close(); }
-                Utility.Log(err);
                 return OldValue;
             }
         }
