@@ -21,13 +21,12 @@ namespace CZAutosplitter.UI.Components
         private static ProcessMemory GameMemory;
         private static Process GameProcess;
 
-        public long RamBase = 0x200000000;
+        public long RamBase;
+        public bool XexStarted = false;
 
         public byte[] CutsceneID = new byte[4] { 0, 0, 0, 0 };
         public bool InLoad;
         public bool InCutscene;
-        public bool OldInLoad;
-        public bool OldInCutscene;
         public string CutsceneIDString;
         public string OldCutsceneIDString;
 
@@ -52,10 +51,6 @@ namespace CZAutosplitter.UI.Components
 
         public IntPtr GetIntPtr(long input)
         {
-            if (input >= 0xC0000000)
-            {
-                input += 0x4E000;
-            }
             return (IntPtr)(RamBase + input);
         }
 
@@ -64,6 +59,7 @@ namespace CZAutosplitter.UI.Components
             if (GameMemory != null && !GameMemory.CheckProcess())
             {
                 GameMemory = null;
+                XexStarted = false;
                 return;
             }
             if (GameMemory == null)
@@ -74,12 +70,26 @@ namespace CZAutosplitter.UI.Components
             {
                 GameMemory.StartProcess();
             }
+            if (!XexStarted)
+            {
+                for (int i = 32; i < 47; ++i)
+                {
+                    IntPtr tempAddr = (nint)1 << i;
+                    IntPtr baseModule = (IntPtr)((nint)tempAddr + 0x82000000);
+                    if (GameMemory.ReadShort(baseModule) == 23117)
+                    {
+                        RamBase = (long)tempAddr;
+                        Utility.Log($@"Ram Base found at: 0x{RamBase:X}");
+                        XexStarted = true;
+                        break;
+                    }
+                }
+            }
         }
 
         public void Update()
         {
             OldCutsceneIDString = CutsceneIDString;
-            OldInLoad = InLoad;
 
             Process[] processesByName = Process.GetProcessesByName("xenia");
             Process[] processesByName2 = Process.GetProcessesByName("xenia_canary");
@@ -94,30 +104,17 @@ namespace CZAutosplitter.UI.Components
             {
                 CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
                 InLoad = TCPFunctions.RequestMemory(0xC8E63FB8, 1, BitConverter.GetBytes(InLoad)).ElementAt(0) != 0;
-                /// For whatever reason this InCutscene address does not work on Xenia so I have to use the old one there.
                 InCutscene = TCPFunctions.RequestMemory(0xC301B497, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
                 CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
+                return;
             }
-            else
+
+            StartProcessActions();
+            if (XexStarted && GameMemory != null)
             {
-                StartProcessActions();
-                try
-                {
-                    var offset = GameMemory.ReadShort(GetIntPtr(0x82000000));
-
-                    if (offset != 23117)
-                    {
-                        RamBase = 0x100000000;
-                    }
-
-                    CutsceneIDString = GameMemory.ReadStringAscii(GetIntPtr(0xC8E63EBC), 4);
-                    InLoad = GameMemory.ReadByte(GetIntPtr(0xC8E63FB8)) != 0;
-                    InCutscene = GameMemory.ReadByte(GetIntPtr(0xCA474D0F)) != 0;
-                }
-                catch (NullReferenceException)
-                {
-                    return;
-                }
+                CutsceneIDString = GameMemory.ReadStringAscii(GetIntPtr(0xC8E63EBC + 0x4E000), 4);
+                InLoad = GameMemory.ReadByte(GetIntPtr(0xC8E63FB8 + 0x4E000)) != 0;
+                InCutscene = GameMemory.ReadByte(GetIntPtr(0xCA4C2D0F)) != 0;
             }
         }
         public bool Start()
