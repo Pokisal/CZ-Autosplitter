@@ -97,11 +97,6 @@ namespace CZAutosplitter.UI.Components
             Process[] processesByName2 = Process.GetProcessesByName("xenia_canary");
             processesByName = processesByName.Concat(processesByName2).ToArray();
 
-            if (processesByName.Length != 0 && (GameProcess == null || processesByName[0].Id.ToString("X8") != GameProcess.Id.ToString("X8")))
-            {
-                GameProcess = processesByName[0];
-            }
-
             if (processesByName.Length == 0)
             {
                 CutsceneID = TCPFunctions.RequestMemory(0xC8E63EBC, 4, CutsceneID);
@@ -109,6 +104,11 @@ namespace CZAutosplitter.UI.Components
                 InCutscene = TCPFunctions.RequestMemory(0xC301B497, 1, BitConverter.GetBytes(InCutscene)).ElementAt(0) != 0;
                 CutsceneIDString = Encoding.UTF8.GetString(CutsceneID);
                 return;
+            }
+
+            if (processesByName.Length != 0 && (GameProcess == null || processesByName[0].Id.ToString("X8") != GameProcess.Id.ToString("X8")))
+            {
+                GameProcess = processesByName[0];
             }
 
             StartProcessActions();
